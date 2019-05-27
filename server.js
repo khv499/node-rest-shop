@@ -1,6 +1,9 @@
 // Importing 'http' package
 const http = require('http');
 
+// Importing app variable from app.js
+const app = require('./app');
+
 // Accessing environment variables in Node.js is supported right out of the box. 
 // When your Node.js process boots up it will automatically provide access to all existing
 // environment variables by creating an 'env' object as property of the 'process' global object. 
@@ -22,7 +25,7 @@ const port = process.env.PORT || 3000;
 // 'requestListener' - Specifies a function to be executed every time the server gets a request. 
 // This function is called a requestListener, and handles request from the user, as well as response 
 // back to the user.
-const server = http.createServer();
+const server = http.createServer(app);
 
 // server.listen() method creates a listener on the specified port or path
 server.listen(port)
