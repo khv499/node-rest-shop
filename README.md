@@ -3,12 +3,12 @@ A Node.js RESTful API Project (Built a simple shop API)
 
 API Structure
 
----------------------------Our API---------------------------
+------------------------------Our API-----------------------------
 
---------/products----------       ----------/orders----------
+--------/products----------            ----------/orders----------
 
----GET--- ---POST---              ---GET--- ---POST---
+---GET--- ---POST---                   ---GET--- ---POST---
 
-------/products/{id}-------       -------/orders/{id}--------
+------/products/{id}-------            -------/orders/{id}--------
 
---GET-- --PATCH-- --DELETE-       ---GET--- ---DELETE---
+--GET-- --PATCH-- --DELETE-            ---GET--- ---DELETE---
