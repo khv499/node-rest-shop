@@ -17,13 +17,22 @@ const morgan = require('morgan');
 // Parse incoming request bodies in a middleware before your handlers, available under the req.body property.
 const bodyParser = require('body-parser')
 
+// Mongoose is a MongoDB object modeling tool designed to work in an asynchronous environment.
+const mongoose = require('mongoose')
+
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders')
 
+// Connecting to MongoDB
+mongoose.connect('mongodb://localhost:27017/node-rest', { useNewUrlParser: true })
+
 app.use(morgan('dev'))
+
+// BodyParsing URLEncoded and JSON Formats
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+// Handling CORS Errors
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept, Authorization');
