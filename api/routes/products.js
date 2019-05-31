@@ -50,7 +50,6 @@ router.post('/',(req, res, next) => {
 
     // save() will store data in database
     product.save().then(result => {
-        console.log(result)
         res.status(201).json({
             message: 'Created product successfully',
             createdProduct: {
