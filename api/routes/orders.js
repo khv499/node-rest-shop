@@ -5,38 +5,135 @@ const express = require('express');
 // except it is bound to an instance of express.Router().
 const router = express.Router();
 
+const mongoose = require('mongoose')
+
+// Importing OrderSchema
+const Order = require('../models/order')
+
+// Importing ProductSchema
+const Product = require('../models/product')
+
 // Handle incoming GET requests to /orders
 router.get('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'Orders were fetched'
+    Order.find()
+    .select("product quantity _id")
+    .populate('product', 'name')
+    .exec()
+    .then(docs => {
+        res.status(200).json({
+            count : docs.length,
+            orders: docs.map(doc => {
+                return {
+                    _id : doc._id,
+                    product : doc.product,
+                    quantity : doc.quantity,
+                    request : {
+                        type : 'GET',
+                        description : 'Order information',
+                        url : 'http://localhost:3000/orders/' + doc._id
+                    }
+                }
+            })
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            error : err
+        })
     })
 })
 
 // Handle incoming POST requests to /orders
 router.post('/', (req, res, next) => {
-    const order = {
-        productId: req.body.productId,
-        quantity: req.body.quantity
-    }
-    res.status(201).json({
-        message: 'Orders was created',
-        order: order
+    Product.findById(req.body.productId)
+    .then(product => {
+        if(!product) {
+            return res.status(404).json({
+                message : "Product not found"
+            })
+        }
+        const order = new Order({
+            _id : new mongoose.Types.ObjectId(),
+            quantity: req.body.quantity,
+            product: req.body.productId
+        })
+        return order.save() 
     })
+    .then(result => {
+        res.status(201).json({
+            message: 'Order Stored',
+            createdOrder : {
+                _id : result._id,
+                product : result.product,
+                quantity : result.quantity
+            },
+            request : {
+                type : 'GET',
+                description : 'Order Information',
+                url : 'http://localhost:3000/orders/' + result._id
+            }
+        })
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            error: err
+        })
+    })
+    
 })
 
 // Handle incoming GET requests to /orders/:orderId
 router.get('/:orderId', (req, res, next) => {
-    res.status(200).json({
-        message: 'Order details',
-        orderId: req.params.orderId
+    Order.findById(req.params.orderId)
+    .populate('product', '_id name price')
+    .select('product quantity _id')
+    .exec()
+    .then(order => {
+        if(!order){
+            return res.status(404).json({
+                message : 'Order not found'
+            })
+        }
+        res.status(200).json({
+            order : order,
+            reqest : {
+                type : 'GET',
+                description : 'Get All Orders',
+                url : 'http://localhost:3000/orders'
+            }
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            error : err
+        })
     })
 })
 
 // Handle incoming DELETE requests to /orders/:orderId
 router.delete('/:orderId', (req, res, next) => {
-    res.status(200).json({
-        message: 'Order deleted',
-        orderId: req.params.orderId
+    Order.remove({
+        _id : req.params.orderId
+    }).exec()
+    .then(result => {
+        res.status(200).json({
+            message : 'Order deleted',
+            reqest : {
+                type : 'POST',
+                description : 'Create a new Order',
+                url : 'http://localhost:3000/orders',
+                body : {
+                    productId : 'ID',
+                    quantity : 'Number'
+                }
+            }
+        })
+    })
+    .catch(err => {
+        res.status(500).json({
+            error : err
+        })
     })
 })
 
