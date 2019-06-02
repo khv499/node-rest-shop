@@ -22,9 +22,11 @@ const mongoose = require('mongoose')
 
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders')
+const userRoutes = require('./api/routes/user')
 
 // Connecting to MongoDB
 mongoose.connect('mongodb://localhost:27017/node-rest', { useNewUrlParser: true })
+mongoose.set('useCreateIndex', true)
 
 app.use(morgan('dev'))
 
@@ -49,6 +51,7 @@ app.use((req, res, next) => {
 // Routes which should handle requests
 app.use('/products', productRoutes);
 app.use('/orders', orderRoutes);
+app.use('/user', userRoutes);
 
 app.use((req, res, next) => {
     const error = new Error('Not found')
