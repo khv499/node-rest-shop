@@ -28,6 +28,9 @@ mongoose.connect('mongodb://localhost:27017/node-rest', { useNewUrlParser: true 
 
 app.use(morgan('dev'))
 
+// Making Uploads folder static - Publically available
+app.use('/uploads', express.static('uploads'))
+
 // BodyParsing URLEncoded and JSON Formats
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
