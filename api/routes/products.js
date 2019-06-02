@@ -9,10 +9,53 @@ const router = express.Router();
 const Product = require('../models/product');
 const mongoose = require('mongoose');
 
+// Multer is a node.js middleware for handling multipart/form-data
+
+// Multer adds a body object and a file or files object to the request object. 
+
+// The body object contains the values of the text fields of the form, 
+// the file or files object contains the files uploaded via the form.
+const multer = require('multer');
+
+// The disk storage engine gives you full control on storing files to disk.
+
+// There are two options available, destination and filename. 
+// They are both functions that determine where the file should be stored.
+
+// destination is used to determine within which folder the uploaded files should be stored.
+// filename is used to determine what the file should be named inside the folder.
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null, './uploads/')
+    },
+    filename: function(req, file, cb){
+        cb(null, Date.now() + file.originalname)
+    }
+})
+
+// Applying filters
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+        // Accept a file
+        cb(null, true)
+    } else{
+        // Reject a file
+        cb(null, false)
+    }
+}
+
+const upload = multer({ 
+    storage : storage, 
+    limits: {
+    fileSize : 1024 * 1024 * 5
+    },
+    fileFilter : fileFilter
+})
+
 // Handle incoming GET requests to /products
 router.get('/',(req, res, next) => {
     Product.find()
-    .select('name price _id')
+    .select('name price _id productImage')
     .exec()
     .then(docs => {
         const response = {
@@ -22,6 +65,7 @@ router.get('/',(req, res, next) => {
                     _id: doc._id,
                     name: doc.name,
                     price: doc.price,
+                    productImage: doc.productImage,
                     request:{
                         type: 'GET',
                         description: 'Product Information',
@@ -41,11 +85,12 @@ router.get('/',(req, res, next) => {
 });
 
 // Handle incoming POST requests to /products
-router.post('/',(req, res, next) => {
+router.post('/', upload.single('productImage') ,(req, res, next) => {
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        productImage: req.file.path
     })
 
     // save() will store data in database
@@ -56,6 +101,7 @@ router.post('/',(req, res, next) => {
                 name: result.name,
                 price: result.price,
                 _id: result._id,
+                productImage: result.productImage,
                 request: {
                     type: 'GET',
                     description: 'Get Created Product Information',
@@ -76,7 +122,7 @@ router.post('/',(req, res, next) => {
 router.get('/:productId', (req, res, next) => {
     const id = req.params.productId;
     Product.findById(id)
-    .select('name price _id')
+    .select('name price _id productImage')
     .exec()
     .then(doc => {
         console.log("From Database", doc);
