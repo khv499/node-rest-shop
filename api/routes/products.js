@@ -17,6 +17,9 @@ const mongoose = require('mongoose');
 // the file or files object contains the files uploaded via the form.
 const multer = require('multer');
 
+// JWT Route Protection
+const checkAuth = require('../middleware/check-auth')
+
 // The disk storage engine gives you full control on storing files to disk.
 
 // There are two options available, destination and filename. 
@@ -85,7 +88,7 @@ router.get('/',(req, res, next) => {
 });
 
 // Handle incoming POST requests to /products
-router.post('/', upload.single('productImage') ,(req, res, next) => {
+router.post('/', checkAuth, upload.single('productImage') ,(req, res, next) => {
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -150,7 +153,7 @@ router.get('/:productId', (req, res, next) => {
 })
 
 // Handle incoming PATCH requests to /products/:productId
-router.patch('/:productId', (req, res, next) => {
+router.patch('/:productId', checkAuth, (req, res, next) => {
     const id = req.params.productId
     const updateOps = {}
     for(const ops of req.body){
@@ -177,7 +180,7 @@ router.patch('/:productId', (req, res, next) => {
 })
 
 // Handle incoming DELETE requests to /products/:productId
-router.delete('/:productId', (req, res, next) => {
+router.delete('/:productId', checkAuth, (req, res, next) => {
     const id = req.params.productId
     Product.remove({_id : id})
     .exec()
