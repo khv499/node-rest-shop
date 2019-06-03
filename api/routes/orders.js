@@ -13,8 +13,11 @@ const Order = require('../models/order')
 // Importing ProductSchema
 const Product = require('../models/product')
 
+// JWT Protection
+const checkAuth = require('../middleware/check-auth')
+
 // Handle incoming GET requests to /orders
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
     Order.find()
     .select("product quantity _id")
     .populate('product', 'name')
@@ -44,7 +47,7 @@ router.get('/', (req, res, next) => {
 })
 
 // Handle incoming POST requests to /orders
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     Product.findById(req.body.productId)
     .then(product => {
         if(!product) {
@@ -84,7 +87,7 @@ router.post('/', (req, res, next) => {
 })
 
 // Handle incoming GET requests to /orders/:orderId
-router.get('/:orderId', (req, res, next) => {
+router.get('/:orderId', checkAuth, (req, res, next) => {
     Order.findById(req.params.orderId)
     .populate('product', '_id name price')
     .select('product quantity _id')
@@ -112,7 +115,7 @@ router.get('/:orderId', (req, res, next) => {
 })
 
 // Handle incoming DELETE requests to /orders/:orderId
-router.delete('/:orderId', (req, res, next) => {
+router.delete('/:orderId', checkAuth, (req, res, next) => {
     Order.remove({
         _id : req.params.orderId
     }).exec()
